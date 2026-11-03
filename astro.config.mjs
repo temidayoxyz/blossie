@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://temidayoxyz.github.io',
+  base: '/blossie',
   integrations: [sitemap()],
   compressHTML: true,
   build: {
