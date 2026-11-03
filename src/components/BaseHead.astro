@@ -1,0 +1,117 @@
+---
+interface Props {
+  title: string;
+  ogTitle?: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  ogTitle,
+  description,
+  image = '/og-default.jpg',
+  imageAlt = 'Blossie — a journal for the lovely little details.',
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://blossie-blog.vercel.app');
+const base = site.toString().replace(/\/$/, '');
+const documentTitle = title.includes('Blossie') ? title : `${title} — Blossie`;
+const socialTitle = ogTitle ?? (title.includes('Blossie') ? title : `${title} — Blossie`);
+const canonical = new URL(Astro.url.pathname, site).toString();
+const socialImage = new URL(image, site).toString();
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Blossie',
+  url: base,
+  description:
+    'An independent journal about style, beauty, home, wellness, culture, and the lovely details of ordinary life.',
+  inLanguage: 'en',
+  publisher: { '@id': `${base}/#organization` },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${base}/search/?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${base}/#organization`,
+  name: 'Blossie',
+  url: base,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${base}/apple-touch-icon.png`,
+    width: 180,
+    height: 180,
+  },
+};
+
+const jsonLdBlocks: Record<string, unknown>[] = [websiteSchema, organizationSchema];
+if (jsonLd) {
+  if (Array.isArray(jsonLd)) jsonLdBlocks.push(...jsonLd);
+  else jsonLdBlocks.push(jsonLd);
+}
+
+const safeJsonLd = JSON.stringify(jsonLdBlocks).replace(/</g, '\\u003c');
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+<title>{documentTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+{!noindex && <meta name="robots" content="index, follow, max-image-preview:large" />}
+
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff9f6" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171114" />
+<meta name="color-scheme" content="light dark" />
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content="Blossie" />
+<meta property="og:title" content={socialTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={socialImage} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:locale" content="en_US" />
+{publishedTime && (
+  <meta property="article:published_time" content={publishedTime.toISOString()} />
+)}
+{modifiedTime && (
+  <meta property="article:modified_time" content={modifiedTime.toISOString()} />
+)}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={socialTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={socialImage} />
+<meta name="twitter:image:alt" content={imageAlt} />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="alternate" type="application/rss+xml" title="Blossie — Journal feed" href="/rss.xml" />
+<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+<script type="application/ld+json" is:inline set:html={safeJsonLd}></script>

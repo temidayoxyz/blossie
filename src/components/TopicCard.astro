@@ -1,0 +1,165 @@
+---
+import { Image } from 'astro:assets';
+import type { Topic } from '../data/topics';
+import Icon from './Icon.astro';
+
+interface Props {
+  topic: Topic;
+  count: number;
+  index: number;
+  variant?: 'grid' | 'row';
+  priority?: boolean;
+}
+
+const { topic, count, index, variant = 'grid', priority = false } = Astro.props;
+---
+
+<article class:list={['topic-card', `topic-card--${variant}`]}>
+  <a class="topic-card__media image-reveal" href={`/topics/${topic.slug}/`} tabindex="-1" aria-hidden="true">
+    <Image
+      src={topic.image}
+      alt={topic.imageAlt}
+      widths={variant === 'row' ? [160, 240, 400] : [400, 560, 720, 900]}
+      sizes={variant === 'row' ? '7rem' : '(min-width: 900px) 45vw, 92vw'}
+      format="webp"
+      quality={82}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+    <span class="topic-card__index">{String(index).padStart(2, '0')}</span>
+  </a>
+
+  <div class="topic-card__body">
+    <div class="topic-card__topline">
+      <span class="eyebrow eyebrow--muted">
+        <span class="eyebrow__rule" aria-hidden="true"></span>
+        {count} {count === 1 ? 'story' : 'stories'}
+      </span>
+    </div>
+    <h2 class="topic-card__title">
+      <a class="title-link" href={`/topics/${topic.slug}/`}>{topic.name}</a>
+    </h2>
+    <p class="topic-card__description">{topic.shortDescription}</p>
+    <a class="text-link topic-card__link" href={`/topics/${topic.slug}/`}>
+      Explore {topic.name}
+      <Icon name="arrow-right" size={14} />
+    </a>
+  </div>
+</article>
+
+<style>
+  .topic-card {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.7fr) 1.3fr;
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .topic-card__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: var(--surface);
+    border-radius: var(--arch);
+  }
+
+  .topic-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-tone);
+  }
+
+  .topic-card__index {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    padding: 0.25rem 0.55rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    color: var(--contrast-ink);
+    background: rgba(44, 31, 36, 0.68);
+    border-radius: var(--radius-xs);
+    transform: translateX(-50%);
+  }
+
+  .topic-card__title {
+    margin-top: 0.7rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 3.1rem);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .topic-card__description {
+    max-width: 26rem;
+    margin-top: 0.8rem;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .topic-card__link {
+    margin-top: 1.3rem;
+  }
+
+  .topic-card--row {
+    grid-template-columns: 7rem 1fr auto;
+    gap: 1.4rem;
+    padding-block: 1.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topic-card--row .topic-card__media {
+    width: 7rem;
+    border-radius: var(--arch);
+  }
+
+  .topic-card--row .topic-card__title {
+    margin-top: 0;
+    font-size: var(--text-xl);
+  }
+
+  .topic-card--row .topic-card__description {
+    display: none;
+  }
+
+  .topic-card--row .topic-card__link {
+    margin-top: 0;
+    border-bottom: 0;
+  }
+
+  .topic-card--row .eyebrow {
+    display: none;
+  }
+
+  @media (max-width: 540px) {
+    .topic-card {
+      grid-template-columns: 8rem 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    .topic-card__description {
+      display: none;
+    }
+
+    .topic-card__link {
+      margin-top: 0.8rem;
+    }
+
+    .topic-card--row {
+      grid-template-columns: 5.5rem 1fr;
+    }
+
+    .topic-card--row .topic-card__media {
+      width: 5.5rem;
+    }
+
+    .topic-card--row .topic-card__link {
+      display: none;
+    }
+  }
+</style>

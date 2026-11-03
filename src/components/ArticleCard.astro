@@ -1,0 +1,306 @@
+---
+import { Image } from 'astro:assets';
+import type { Article } from '../lib/articles';
+import { getReadingTime } from '../lib/articles';
+import { getTopicFor } from '../lib/articles';
+import ArticleMeta from './ArticleMeta.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  article: Article;
+  variant?: 'hero' | 'large' | 'standard' | 'row';
+  headingLevel?: 'h2' | 'h3';
+  priority?: boolean;
+  showExcerpt?: boolean;
+  featuredLabel?: string;
+}
+
+const {
+  article,
+  variant = 'standard',
+  headingLevel = 'h3',
+  priority = false,
+  showExcerpt = variant !== 'standard',
+  featuredLabel,
+} = Astro.props;
+
+const topic = getTopicFor(article);
+const readingTime = getReadingTime(article);
+const Heading = headingLevel;
+const url = `/journal/${article.id}/`;
+
+const imageConfig = {
+  hero: {
+    widths: [480, 640, 800, 1000, 1200],
+    sizes: '(min-width: 1100px) 38vw, (min-width: 700px) 55vw, 92vw',
+  },
+  large: {
+    widths: [400, 640, 800, 1000, 1200],
+    sizes: '(min-width: 1000px) 45vw, 92vw',
+  },
+  standard: {
+    widths: [320, 480, 640, 800],
+    sizes: '(min-width: 1000px) 29vw, (min-width: 640px) 44vw, 92vw',
+  },
+  row: {
+    widths: [160, 240, 360, 480],
+    sizes: '7.5rem',
+  },
+}[variant];
+
+const searchText = [
+  article.data.title,
+  article.data.category,
+  article.data.excerpt,
+  article.data.standfirst,
+  ...article.data.tags,
+]
+  .join(' ')
+  .toLowerCase();
+---
+
+<article
+  class:list={['card', `card--${variant}`]}
+  data-article
+  data-category={article.data.category}
+  data-topics={[article.data.category, ...article.data.tags].join('|').toLowerCase()}
+  data-title={article.data.title.toLowerCase()}
+  data-excerpt={article.data.excerpt.toLowerCase()}
+  data-search={searchText}
+  data-date={article.data.pubDate.valueOf()}
+>
+  <a
+    class="card__media image-reveal"
+    href={url}
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <Image
+      src={article.data.cover}
+      alt={article.data.coverAlt}
+      widths={imageConfig.widths}
+      sizes={imageConfig.sizes}
+      format="webp"
+      quality={variant === 'row' ? 78 : 82}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={priority ? 'high' : undefined}
+    />
+    {featuredLabel && <span class="card__flag">{featuredLabel}</span>}
+  </a>
+
+  <div class="card__body">
+    <div class="card__topline">
+      {topic ? (
+        <a class="category" href={`/topics/${topic.slug}/`}>{article.data.category}</a>
+      ) : (
+        <span class="category">{article.data.category}</span>
+      )}
+      {article.data.featured && !featuredLabel && (
+        <span class="card__featured">Cover story</span>
+      )}
+    </div>
+
+    <Heading class="card__title">
+      <a class="title-link" href={url}>{article.data.title}</a>
+    </Heading>
+
+    {showExcerpt && <p class="card__excerpt">{article.data.excerpt}</p>}
+
+    <div class="card__footer">
+      <ArticleMeta date={article.data.pubDate} readingTime={readingTime} />
+      <a class="card__arrow" href={url} aria-label={`Read ${article.data.title}`}>
+        <Icon name="arrow-right" size={15} />
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .card__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+  }
+
+  .card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-tone);
+  }
+
+  .card--large .card__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .card--standard .card__media {
+    aspect-ratio: 4 / 5;
+  }
+
+  .card--hero .card__media {
+    aspect-ratio: 3 / 3.75;
+    border-radius: var(--arch);
+  }
+
+  .card--row .card__media {
+    width: 7.5rem;
+    aspect-ratio: 4 / 5;
+    flex: none;
+  }
+
+  .card__flag {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    padding: 0.45rem 0.6rem;
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--contrast-ink);
+    background: rgba(44, 31, 36, 0.83);
+    border-radius: var(--radius-xs);
+    backdrop-filter: blur(5px);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-top: 1rem;
+  }
+
+  .card__topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .card__featured {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .card__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+
+  .card--standard .card__title {
+    font-size: clamp(1.55rem, 1.35rem + 0.6vw, 1.95rem);
+  }
+
+  .card--large .card__title {
+    font-size: clamp(1.85rem, 1.55rem + 1.1vw, 2.6rem);
+  }
+
+  .card--hero .card__title {
+    font-size: clamp(2rem, 1.65rem + 1.4vw, 3rem);
+  }
+
+  .card--row .card__title {
+    font-size: var(--text-xl);
+  }
+
+  .card__excerpt {
+    margin-top: 0.7rem;
+    max-width: 34rem;
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    color: var(--muted);
+  }
+
+  .card--hero .card__excerpt {
+    margin-top: 0.85rem;
+    font-size: var(--text-base);
+    line-height: 1.65;
+  }
+
+  .card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 0.9rem;
+  }
+
+  .card__arrow {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition:
+      color var(--duration-base) ease,
+      background-color var(--duration-base) ease,
+      border-color var(--duration-base) ease,
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .card__arrow:hover {
+    color: var(--button-ink);
+    background: var(--button-bg);
+    border-color: var(--button-bg);
+    transform: translateX(2px);
+  }
+
+  .card--row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    align-items: start;
+    gap: 1.1rem;
+  }
+
+  .card--row .card__body {
+    padding-top: 0;
+    min-width: 0;
+  }
+
+  .card--row .card__footer {
+    justify-content: flex-start;
+    padding-top: 0.6rem;
+  }
+
+  .card--row .card__arrow {
+    display: none;
+  }
+
+  .card--row .card__excerpt {
+    display: none;
+  }
+
+  @media (max-width: 620px) {
+    .card--row {
+      grid-template-columns: 6rem 1fr;
+      gap: 0.9rem;
+    }
+
+    .card--row .card__media {
+      width: 6rem;
+    }
+
+    .card--row .card__title {
+      font-size: var(--text-lg);
+    }
+  }
+</style>

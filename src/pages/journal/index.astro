@@ -1,0 +1,462 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getAllArticles, getCategoryCounts } from '../../lib/articles';
+import { topics } from '../../data/topics';
+
+const articles = await getAllArticles();
+const counts = getCategoryCounts(articles);
+const latestDate = articles[0]?.data.pubDate;
+const latestLabel = latestDate
+  ? latestDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : '';
+---
+
+<BaseLayout
+  title="The Journal"
+  description="All stories from Blossie: essays and notes on personal style, beauty, home, wellness, culture, and the rituals of ordinary life."
+>
+  <header class="journal-hero">
+    <div class="container journal-hero__inner">
+      <div class="journal-hero__copy">
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          The Journal
+        </p>
+        <h1 class="page-hero__title journal-hero__title">
+          All the lovely<br /><em>little things.</em>
+        </h1>
+        <p class="page-hero__intro">
+          Essays, notes, and small discoveries on the life that happens between
+          the big events. Browse everything, or follow a thread.
+        </p>
+      </div>
+      <dl class="journal-hero__stats">
+        <div>
+          <dt>Stories</dt>
+          <dd>{String(articles.length).padStart(2, '0')}</dd>
+        </div>
+        <div>
+          <dt>Subjects</dt>
+          <dd>{String(topics.length).padStart(2, '0')}</dd>
+        </div>
+        <div>
+          <dt>Latest</dt>
+          <dd>{latestLabel}</dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <section class="journal section--sm" aria-labelledby="journal-list-heading">
+    <div class="container">
+      <h2 id="journal-list-heading" class="sr-only">Browse all journal stories</h2>
+
+      <div class="journal-toolbar" data-journal-toolbar>
+        <div class="journal-toolbar__top">
+          <form class="journal-search" action="/search/" method="get" role="search" data-journal-search-form>
+            <label class="sr-only" for="journal-search-input">Search the journal</label>
+            <Icon name="search" size={17} />
+            <input
+              id="journal-search-input"
+              type="search"
+              name="q"
+              placeholder="Search stories and ideas"
+              autocomplete="off"
+              data-journal-search
+            />
+          </form>
+
+          <div class="journal-sort">
+            <label for="journal-sort">Sort by</label>
+            <div class="journal-sort__control">
+              <select id="journal-sort" data-journal-sort>
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="az">A–Z</option>
+              </select>
+              <Icon name="chevron-down" size={13} />
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-row" role="group" aria-label="Filter stories by subject">
+          <a
+            class="filter-chip is-active"
+            href="/journal/"
+            data-filter-topic="all"
+            data-category="all"
+            aria-current="true"
+          >
+            All <span>{articles.length}</span>
+          </a>
+          {topics.map((topic) => (
+            <a
+              class="filter-chip"
+              href={`/topics/${topic.slug}/`}
+              data-filter-topic={topic.slug}
+              data-category={topic.category}
+            >
+              {topic.name} <span>{counts.get(topic.category) ?? 0}</span>
+            </a>
+          ))}
+        </div>
+
+        <p class="journal-status" data-journal-status role="status" aria-live="polite">
+          Showing {articles.length} of {articles.length} stories
+        </p>
+      </div>
+
+      <div class="journal-grid" data-journal-grid>
+        {articles.map((article) => (
+          <ArticleCard article={article} variant="large" showExcerpt />
+        ))}
+      </div>
+
+      <div class="journal-empty empty-state" data-journal-empty hidden>
+        <Icon name="search" size={26} />
+        <h3>No stories found just yet</h3>
+        <p>
+          Try a different word or subject — or clear the filters and begin again.
+        </p>
+        <button class="btn" type="button" data-journal-reset>Show all stories</button>
+      </div>
+
+      <noscript>
+        <p class="journal-noscript">
+          Filtering works without JavaScript by visiting a topic page. Use the
+          <a class="link-plain" href="/search/">full search page</a> or browse the
+          <a class="link-plain" href="/archive/">archive</a>.
+        </p>
+      </noscript>
+    </div>
+  </section>
+
+  <section class="journal-footer section--sm" aria-labelledby="journal-subjects-heading">
+    <div class="container journal-footer__inner">
+      <div>
+        <p class="eyebrow">Keep wandering</p>
+        <h2 id="journal-subjects-heading">Prefer to browse by subject?</h2>
+      </div>
+      <div class="journal-subject-links">
+        {topics.map((topic) => (
+          <a href={`/topics/${topic.slug}/`}>
+            {topic.name}
+            <Icon name="arrow-up-right" size={13} />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/journal';
+</script>
+
+<style>
+  .journal-hero {
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line);
+    padding-top: clamp(3rem, 6vw, 5.5rem);
+    padding-bottom: clamp(2.75rem, 5vw, 4.5rem);
+  }
+
+  .journal-hero__inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: clamp(2.5rem, 6vw, 6rem);
+  }
+
+  .journal-hero__title {
+    margin-top: 1rem;
+    font-size: clamp(3.75rem, 2.4rem + 5vw, 7.25rem);
+    line-height: 0.94;
+  }
+
+  .journal-hero__title em {
+    font-style: italic;
+    color: var(--berry);
+  }
+
+  .journal-hero__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .journal-hero__stats div {
+    min-width: 4.25rem;
+  }
+
+  .journal-hero__stats dt {
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .journal-hero__stats dd {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 1.2rem + 0.6vw, 1.9rem);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .journal-toolbar {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.1rem, 2vw, 1.4rem);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .journal-toolbar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .journal-search {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.7rem;
+    flex: 1;
+    max-width: 30rem;
+    min-height: 2.85rem;
+    padding-inline: 0.85rem;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-xs);
+  }
+
+  .journal-search input {
+    width: 100%;
+    padding-block: 0.6rem;
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    outline: 0;
+  }
+
+  .journal-search input::placeholder {
+    color: var(--faint);
+  }
+
+  .journal-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex: none;
+  }
+
+  .journal-sort > label {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .journal-sort__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .journal-sort select {
+    min-height: 2.85rem;
+    padding: 0.45rem 2rem 0.45rem 0.75rem;
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-xs);
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .journal-sort__control svg {
+    position: absolute;
+    right: 0.7rem;
+    pointer-events: none;
+    color: var(--muted);
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.75rem;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    border: 1px solid transparent;
+    border-radius: var(--radius-xs);
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .filter-chip span {
+    font-size: var(--text-2xs);
+    color: var(--faint);
+  }
+
+  .filter-chip:hover {
+    color: var(--ink);
+    background: var(--surface);
+  }
+
+  .filter-chip.is-active {
+    color: var(--ink);
+    background: var(--card);
+    border-color: var(--line-strong);
+  }
+
+  .filter-chip.is-active span {
+    color: var(--accent);
+  }
+
+  .journal-status {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+
+  .journal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
+    margin-top: clamp(2.25rem, 4vw, 3.5rem);
+  }
+
+  .journal-grid :global(.card--large .card__media) {
+    aspect-ratio: 4 / 3;
+  }
+
+  .journal-empty {
+    margin-top: 2.5rem;
+  }
+
+  .journal-empty svg {
+    color: var(--rose);
+  }
+
+  .journal-noscript {
+    margin-top: 1.5rem;
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  .journal-footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg-soft);
+  }
+
+  .journal-footer__inner {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .journal-footer h2 {
+    margin-top: 0.6rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 1.5rem + 1.3vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.1;
+  }
+
+  .journal-subject-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.5rem;
+  }
+
+  .journal-subject-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-block: 0.4rem;
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--line-strong);
+    transition:
+      color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .journal-subject-links a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 880px) {
+    .journal-hero__inner {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .journal-hero__stats {
+      max-width: 30rem;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .journal-toolbar__top {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .journal-search {
+      max-width: none;
+    }
+
+    .journal-sort {
+      justify-content: space-between;
+    }
+
+    .journal-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .journal-footer__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .filter-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      margin-inline: -0.25rem;
+      padding-inline: 0.25rem;
+      padding-bottom: 0.35rem;
+      scrollbar-width: thin;
+    }
+
+    .filter-chip {
+      white-space: nowrap;
+    }
+  }
+</style>

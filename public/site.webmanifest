@@ -1,0 +1,23 @@
+{
+  "name": "Blossie",
+  "short_name": "Blossie",
+  "description": "An independent journal for the lovely little details of ordinary life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff9f6",
+  "theme_color": "#754650",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

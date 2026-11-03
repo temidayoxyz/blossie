@@ -1,0 +1,586 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PetalMark from '../components/PetalMark.astro';
+import Icon from '../components/Icon.astro';
+import aboutFlowers from '../assets/images/about-flowers.jpg';
+import aboutDetail from '../assets/images/about-detail.jpg';
+import { getAllArticles } from '../lib/articles';
+import { topics } from '../data/topics';
+
+const articles = await getAllArticles();
+const firstYear = articles.at(-1)?.data.pubDate.getUTCFullYear() ?? 2026;
+---
+
+<BaseLayout
+  title="About Blossie"
+  description="Blossie is an independent editorial journal about personal style, beauty, home, wellness, culture, and the lovely details of ordinary life."
+>
+  <header class="about-hero">
+    <div class="container about-hero__inner">
+      <div class="about-hero__copy">
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          About the journal
+        </p>
+        <h1 class="about-hero__title">
+          A journal for the<br /><em>lovely little</em><br />details.
+        </h1>
+        <p class="page-hero__intro">
+          Blossie is an independent editorial project about attention — the
+          clothes that feel like us, the rooms that hold our lives, the rituals
+          that give a day its shape.
+        </p>
+        <div class="about-hero__actions">
+          <a class="btn" href="/journal/">
+            Read the journal
+            <Icon name="arrow-right" size={15} />
+          </a>
+          <a class="text-link" href="/archive/">
+            Browse the archive
+            <Icon name="arrow-up-right" size={13} />
+          </a>
+        </div>
+      </div>
+
+      <div class="about-hero__media">
+        <div class="about-hero__frame image-reveal">
+          <Image
+            src={aboutFlowers}
+            alt="A generous bouquet of peach roses, white blooms, and greenery on a table set with china."
+            widths={[480, 640, 800, 1000]}
+            sizes="(min-width: 900px) 40vw, 92vw"
+            format="webp"
+            quality={84}
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+        <div class="about-hero__detail">
+          <Image
+            src={aboutDetail}
+            alt="A delicate branch of pale pink blossom against a soft white background."
+            widths={[240, 360, 480]}
+            sizes="12rem"
+            format="webp"
+            quality={82}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <span class="about-hero__mark" aria-hidden="true"><PetalMark size={38} /></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="about-intro section" aria-labelledby="about-intro-heading">
+    <div class="container about-intro__inner">
+      <div class="about-intro__aside">
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          Why we are here
+        </p>
+        <p class="about-intro__issue">Issue No. 04 · Autumn 2026</p>
+      </div>
+      <div class="about-intro__copy">
+        <h2 id="about-intro-heading">
+          Most of life happens in the in-between: the kettle boiling, the coat
+          on the chair, the conversation that carries on after the plates are
+          cleared.
+        </h2>
+        <p>
+          We started Blossie because those moments are easy to miss. The world
+          is loud with advice about how to become a different person. This
+          journal is interested in a quieter question: how do you become more at
+          home in the person you already are?
+        </p>
+        <p>
+          The answer, for us, is rarely a grand reinvention. It is a dress that
+          fits. A room that breathes. A Sunday with nothing to prove. A
+          conversation that is allowed to take its time. Beauty, in this sense,
+          is not a standard to meet. It is a way of paying attention.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="principles" aria-labelledby="principles-heading">
+    <div class="container">
+      <div class="principles__head">
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          What we believe
+        </p>
+        <h2 id="principles-heading">Three small convictions.</h2>
+      </div>
+      <div class="principles__grid">
+        <article class="principle">
+          <span class="principle__number">01</span>
+          <h3>Attention is a form of care.</h3>
+          <p>
+            To notice the light, the fabric, the tiredness in someone’s voice is
+            not a distraction from the important things. It is how the important
+            things become visible.
+          </p>
+        </article>
+        <article class="principle">
+          <span class="principle__number">02</span>
+          <h3>Ordinary life is enough.</h3>
+          <p>
+            We do not need a bigger house, a better body, or a more photogenic
+            breakfast to begin. The material for a good life is already in the
+            room, waiting to be seen with fresh eyes.
+          </p>
+        </article>
+        <article class="principle">
+          <span class="principle__number">03</span>
+          <h3>Less hurry, more texture.</h3>
+          <p>
+            Speed is not the only measure of a day. A little friction — a
+            handwritten note, a meal that takes longer, a walk without a
+            destination — can make a life feel more real.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-editors" aria-labelledby="about-editors-heading">
+    <div class="container about-editors__inner">
+      <div class="about-editors__media">
+        <Image
+          src={aboutDetail}
+          alt="A slender branch of pale blossoms, closely observed."
+          widths={[360, 560, 800]}
+          sizes="(min-width: 900px) 40vw, 92vw"
+          format="webp"
+          quality={82}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="about-editors__copy">
+        <PetalMark size={30} />
+        <p class="eyebrow">The editors</p>
+        <h2 id="about-editors-heading">A collective voice, not a personality cult.</h2>
+        <p>
+          Blossie is written in the collective voice of its editors — an
+          editorial concept rather than a scrapbook of invented biographies. We
+          do not publish fictional awards, borrowed credentials, or sponsored
+          recommendations. The photographs are credited honestly. The newsletter
+          is a clear demo. The work is the work.
+        </p>
+        <p>
+          We are interested in the subjects we return to in our own lives:
+          <a class="link-plain" href="/topics/style/">what we wear</a>,
+          <a class="link-plain" href="/topics/home/">the rooms we make</a>,
+          <a class="link-plain" href="/topics/wellness/">how we rest</a>, and the
+          <a class="link-plain" href="/topics/culture/">stories we keep</a>.
+        </p>
+        <div class="about-editors__facts">
+          <div>
+            <span>{String(articles.length).padStart(2, '0')}</span>
+            <p>Stories in this issue</p>
+          </div>
+          <div>
+            <span>{String(topics.length).padStart(2, '0')}</span>
+            <p>Subjects to wander</p>
+          </div>
+          <div>
+            <span>{firstYear}</span>
+            <p>The year the first story was filed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-end">
+    <div class="container about-end__inner">
+      <div>
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          Begin anywhere
+        </p>
+        <h2>There is no right order to read a journal.</h2>
+      </div>
+      <div class="about-end__actions">
+        <a class="btn" href="/journal/">
+          Read the latest stories
+          <Icon name="arrow-right" size={15} />
+        </a>
+        <a class="text-link" href="/archive/">
+          Or start in the archive
+          <Icon name="arrow-right" size={14} />
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-hero {
+    position: relative;
+    padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3.5rem, 7vw, 6rem);
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .about-hero__inner {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: clamp(2.5rem, 7vw, 7rem);
+  }
+
+  .about-hero__title {
+    margin-top: 1.1rem;
+    font-family: var(--font-display);
+    font-size: clamp(3.4rem, 2.2rem + 4.7vw, 6.8rem);
+    font-weight: 500;
+    line-height: 0.94;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .about-hero__title em {
+    font-style: italic;
+    color: var(--berry);
+  }
+
+  .about-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem 1.75rem;
+    margin-top: 2rem;
+  }
+
+  .about-hero__media {
+    position: relative;
+    justify-self: end;
+    width: min(100%, 32rem);
+    padding-bottom: 3.5rem;
+    padding-left: 4rem;
+  }
+
+  .about-hero__frame {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: var(--arch);
+  }
+
+  .about-hero__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-tone);
+  }
+
+  .about-hero__detail {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: clamp(9rem, 16vw, 13rem);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--card);
+    border: 0.6rem solid var(--bg-soft);
+    border-radius: var(--radius-xs);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .about-hero__detail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-hero__mark {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    display: grid;
+    place-items: center;
+    width: 4.25rem;
+    height: 4.25rem;
+    color: var(--berry);
+    background: rgba(255, 253, 251, 0.9);
+    border-radius: 50%;
+  }
+
+  .about-intro__inner {
+    display: grid;
+    grid-template-columns: 0.42fr 1.58fr;
+    gap: clamp(2rem, 7vw, 7rem);
+    align-items: start;
+  }
+
+  .about-intro__aside {
+    display: grid;
+    gap: 1rem;
+    padding-top: 0.6rem;
+  }
+
+  .about-intro__issue {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.05em;
+    color: var(--faint);
+  }
+
+  .about-intro__copy h2 {
+    max-width: 50rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 1.7rem + 2vw, 3.8rem);
+    font-weight: 500;
+    line-height: 1.13;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+
+  .about-intro__copy p {
+    max-width: 40rem;
+    margin-top: 1.4rem;
+    font-size: var(--text-md);
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  .principles {
+    padding-block: var(--section-y);
+    color: var(--contrast-ink);
+    background: var(--contrast-bg);
+  }
+
+  .principles__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--contrast-line);
+  }
+
+  .principles__head .eyebrow {
+    color: var(--contrast-muted);
+  }
+
+  .principles__head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.9rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--contrast-ink);
+  }
+
+  .principles__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    padding-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .principle {
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--contrast-line);
+  }
+
+  .principle__number {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.1em;
+    color: var(--rose);
+  }
+
+  .principle h3 {
+    margin-top: 1.6rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--contrast-ink);
+  }
+
+  .principle p {
+    margin-top: 0.9rem;
+    font-size: var(--text-sm);
+    line-height: 1.75;
+    color: var(--contrast-muted);
+  }
+
+  .about-editors {
+    padding-block: var(--section-y);
+    background: var(--bg);
+  }
+
+  .about-editors__inner {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(2.5rem, 7vw, 6rem);
+    align-items: center;
+  }
+
+  .about-editors__media {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: var(--arch);
+  }
+
+  .about-editors__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-tone);
+  }
+
+  .about-editors__copy {
+    max-width: 38rem;
+    color: var(--rose);
+  }
+
+  .about-editors__copy .eyebrow {
+    margin-top: 1.2rem;
+    margin-bottom: 0.7rem;
+    color: var(--accent);
+  }
+
+  .about-editors__copy h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 1.65rem + 1.8vw, 3.4rem);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .about-editors__copy > p:not(.eyebrow) {
+    margin-top: 1.15rem;
+    font-size: var(--text-sm);
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .about-editors__facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .about-editors__facts span {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 1.4rem + 0.7vw, 2.15rem);
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .about-editors__facts p {
+    margin-top: 0.35rem;
+    font-size: var(--text-2xs);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .about-end {
+    padding-block: var(--section-y-sm);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+  }
+
+  .about-end__inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+
+  .about-end h2 {
+    max-width: 35rem;
+    margin-top: 0.8rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.65rem + 1.4vw, 2.9rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .about-end__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    flex: none;
+  }
+
+  @media (max-width: 900px) {
+    .about-hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .about-hero__media {
+      justify-self: start;
+      width: min(100%, 28rem);
+    }
+
+    .about-intro__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .about-intro__aside {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .principles__grid {
+      grid-template-columns: 1fr;
+      max-width: 40rem;
+    }
+
+    .about-editors__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .about-editors__media {
+      max-width: 28rem;
+    }
+
+    .about-end__inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .about-hero__media {
+      padding-left: 2.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .about-hero__mark {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+
+    .about-editors__facts {
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+
+    .about-end__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .about-end__actions .btn {
+      width: 100%;
+    }
+  }
+</style>

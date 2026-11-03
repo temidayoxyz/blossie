@@ -1,0 +1,511 @@
+---
+import Wordmark from './Wordmark.astro';
+import Icon from './Icon.astro';
+import ThemeSelect from './ThemeSelect.astro';
+import PetalMark from './PetalMark.astro';
+
+const path = Astro.url.pathname;
+
+const navItems = [
+  { href: '/journal/', label: 'Journal' },
+  { href: '/topics/', label: 'Topics' },
+  { href: '/about/', label: 'About' },
+  { href: '/archive/', label: 'Archive' },
+];
+
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href);
+---
+
+<div class="announcement">
+  <div class="container announcement__inner">
+    <p class="announcement__message">
+      <PetalMark size={14} class="announcement__petal" />
+      <span>The October issue is here.</span>
+    </p>
+    <a class="announcement__link" href="/journal/">
+      <span>Read the new stories</span>
+      <Icon name="arrow-right" size={13} />
+    </a>
+  </div>
+</div>
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <Wordmark />
+
+    <nav class="primary-nav" aria-label="Primary">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={['primary-nav__link', { 'is-active': isActive(item.href) }]}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <a class="icon-btn" href="/search/" aria-label="Search the journal">
+        <Icon name="search" size={18} />
+      </a>
+      <ThemeSelect />
+      <button
+        type="button"
+        class="menu-toggle"
+        data-menu-open
+        aria-controls="site-menu"
+        aria-expanded="false"
+        aria-label="Open menu"
+      >
+        <Icon name="menu" size={19} />
+        <span>Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <noscript>
+    <nav class="noscript-nav container" aria-label="Primary">
+      {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a href="/search/">Search</a>
+    </nav>
+  </noscript>
+</header>
+
+<dialog id="site-menu" class="menu-dialog" data-menu-dialog aria-labelledby="site-menu-title">
+  <div class="menu-dialog__inner">
+    <div class="menu-dialog__top">
+      <Wordmark />
+      <button type="button" class="icon-btn menu-dialog__close" data-menu-close aria-label="Close menu">
+        <Icon name="close" size={20} />
+      </button>
+    </div>
+
+    <h2 id="site-menu-title" class="sr-only">Site menu</h2>
+
+    <nav class="menu-nav" aria-label="Mobile">
+      {navItems.map((item, index) => (
+        <a href={item.href} class="menu-nav__link">
+          <span class="menu-nav__index">0{index + 1}</span>
+          <span>{item.label}</span>
+          <Icon name="arrow-right" size={20} class="menu-nav__arrow" />
+        </a>
+      ))}
+      <a href="/search/" class="menu-nav__link">
+        <span class="menu-nav__index">05</span>
+        <span>Search</span>
+        <Icon name="arrow-right" size={20} class="menu-nav__arrow" />
+      </a>
+    </nav>
+
+    <div class="menu-dialog__lower">
+      <form class="menu-search" action="/search/" method="get" role="search">
+        <label class="sr-only" for="menu-search-input">Search the journal</label>
+        <Icon name="search" size={17} />
+        <input
+          id="menu-search-input"
+          name="q"
+          type="search"
+          placeholder="Search stories, topics, ideas"
+          autocomplete="off"
+        />
+        <button type="submit" aria-label="Search">
+          <Icon name="arrow-right" size={17} />
+        </button>
+      </form>
+
+      <ThemeSelect variant="inline" id="menu-appearance" />
+
+      <div class="menu-dialog__note">
+        <p>Ten stories, six subjects, one slower corner of the internet.</p>
+        <a class="text-link" href="/rss.xml">
+          RSS feed
+          <Icon name="rss" size={13} />
+        </a>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .announcement {
+    position: relative;
+    z-index: 40;
+    color: var(--contrast-ink);
+    background: var(--contrast-bg);
+  }
+
+  .announcement__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.4rem;
+    padding-block: 0.45rem;
+  }
+
+  .announcement__message {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.075em;
+    color: var(--contrast-muted);
+  }
+
+  .announcement__petal {
+    color: var(--rose);
+  }
+
+  .announcement__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.07em;
+    color: var(--contrast-ink);
+    border-bottom: 1px solid var(--contrast-line);
+    transition:
+      color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .announcement__link:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+
+  .announcement__link svg {
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .announcement__link:hover svg {
+    transform: translateX(2px);
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color var(--duration-base) ease,
+      border-color var(--duration-base) ease;
+  }
+
+  .site-header.is-scrolled {
+    border-bottom-color: var(--line);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: var(--header-height);
+  }
+
+  .primary-nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.3rem, 2.7vw, 2.35rem);
+    margin-left: auto;
+  }
+
+  .primary-nav__link {
+    position: relative;
+    padding-block: 0.4rem;
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color var(--duration-fast) ease;
+  }
+
+  .primary-nav__link::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .primary-nav__link:hover,
+  .primary-nav__link.is-active {
+    color: var(--ink);
+  }
+
+  .primary-nav__link:hover::after,
+  .primary-nav__link.is-active::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-left: clamp(0.5rem, 2vw, 1.5rem);
+    border-left: 1px solid var(--line);
+  }
+
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .noscript-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding-block: 0.75rem;
+    font-size: var(--text-xs);
+    border-top: 1px solid var(--line);
+  }
+
+  .menu-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    color: var(--ink);
+    background: var(--bg);
+    border: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .menu-dialog[open] {
+    animation: menu-fade 260ms var(--ease-out) both;
+  }
+
+  .menu-dialog::backdrop {
+    background: var(--scrim);
+    animation: backdrop-fade 260ms var(--ease-out) both;
+  }
+
+  .menu-dialog__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: min(100% - (var(--gutter) * 2), 40rem);
+    margin-inline: auto;
+    padding-block: 1.15rem 2rem;
+  }
+
+  .menu-dialog__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .menu-dialog__close {
+    margin-right: -0.5rem;
+  }
+
+  .menu-nav {
+    display: grid;
+    margin-block: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .menu-nav__link {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+    transition: color var(--duration-fast) ease;
+  }
+
+  .menu-nav__link > span:nth-child(2) {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 8vw, 3.1rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .menu-nav__index {
+    align-self: start;
+    padding-top: 0.45rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    color: var(--rose);
+  }
+
+  .menu-nav__arrow {
+    color: var(--faint);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .menu-nav__link:hover {
+    color: var(--accent);
+  }
+
+  .menu-nav__link:hover .menu-nav__arrow {
+    transform: translateX(4px);
+    color: var(--accent);
+  }
+
+  .menu-dialog__lower {
+    display: grid;
+    gap: 1.75rem;
+    padding-top: 0.5rem;
+    margin-top: auto;
+  }
+
+  .menu-search {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.4rem 0.4rem 0.9rem;
+    color: var(--muted);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-xs);
+    background: var(--card);
+  }
+
+  .menu-search input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0;
+    font-size: var(--text-sm);
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    outline: 0;
+  }
+
+  .menu-search input::placeholder {
+    color: var(--faint);
+  }
+
+  .menu-search button {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--button-ink);
+    background: var(--button-bg);
+    border-radius: var(--radius-xs);
+  }
+
+  .menu-dialog__note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .menu-dialog__note p {
+    max-width: 18rem;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+
+  .menu-dialog__note .text-link {
+    margin-bottom: 0.25rem;
+  }
+
+  @keyframes menu-fade {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes backdrop-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .primary-nav {
+      display: none;
+    }
+
+    .header-actions {
+      gap: 0.15rem;
+      padding-left: 0.6rem;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .theme-select:not(.theme-select--inline) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .announcement__message span {
+      max-width: 11rem;
+      line-height: 1.4;
+    }
+
+    .announcement__link span {
+      display: none;
+    }
+
+    .announcement__link {
+      border: 0;
+    }
+
+    .header-actions {
+      border-left: 0;
+    }
+
+    .menu-toggle span {
+      display: none;
+    }
+
+    .menu-toggle {
+      min-width: 2.75rem;
+      justify-content: center;
+      padding-inline: 0.35rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-dialog[open],
+    .menu-dialog::backdrop {
+      animation: none;
+    }
+  }
+</style>

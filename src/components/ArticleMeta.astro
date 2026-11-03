@@ -1,0 +1,34 @@
+---
+import { formatShortDate } from '../lib/articles';
+
+interface Props {
+  date: Date;
+  readingTime: number;
+  author?: string;
+  tone?: 'default' | 'light';
+  class?: string;
+}
+
+const { date, readingTime, author, tone = 'default', class: className } = Astro.props;
+---
+
+<div
+  class:list={['meta', { 'meta--light': tone === 'light' }, className]}
+  data-article-meta
+>
+  {author && (
+    <>
+      <span>By {author}</span>
+      <span class="meta__dot" aria-hidden="true"></span>
+    </>
+  )}
+  <time datetime={date.toISOString()}>{formatShortDate(date)}</time>
+  <span class="meta__dot" aria-hidden="true"></span>
+  <span>{readingTime} min read</span>
+</div>
+
+<style>
+  .meta--light {
+    color: var(--contrast-muted);
+  }
+</style>

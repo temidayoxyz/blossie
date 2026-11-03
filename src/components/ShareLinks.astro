@@ -1,0 +1,132 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  url: string;
+  title: string;
+  class?: string;
+}
+
+const { url, title, class: className } = Astro.props;
+const mailHref = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(
+  `I thought you might like this from Blossie: ${url}`,
+)}`;
+---
+
+<div class:list={['article-share', className]} aria-label="Share this story">
+  <span class="article-share__label">Share</span>
+  <button
+    type="button"
+    class="article-share__button"
+    data-copy-link
+    data-copy-url={url}
+    aria-label={`Copy link to ${title}`}
+  >
+    <Icon name="copy" size={16} />
+    <span>Copy</span>
+  </button>
+  <button
+    type="button"
+    class="article-share__button"
+    data-share-link
+    data-share-url={url}
+    data-share-title={title}
+    aria-label={`Share ${title}`}
+  >
+    <Icon name="share" size={16} />
+    <span>Share</span>
+  </button>
+  <a class="article-share__button" href={mailHref} aria-label={`Email ${title}`}>
+    <Icon name="mail" size={16} />
+    <span>Email</span>
+  </a>
+</div>
+
+<style>
+  .article-share {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+  }
+
+  .article-share__label {
+    margin-bottom: 0.35rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .article-share__button {
+    display: grid;
+    place-items: center;
+    gap: 0.15rem;
+    width: 2.9rem;
+    min-height: 2.9rem;
+    padding: 0.35rem 0.2rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .article-share__button span {
+    font-size: 0.5625rem;
+    letter-spacing: 0.03em;
+  }
+
+  .article-share__button:hover {
+    color: var(--ink);
+    background: var(--bg-soft);
+    border-color: var(--rose-soft);
+  }
+
+  @media (max-width: 800px) {
+    .article-share {
+      position: static;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      padding-block: 0.85rem;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .article-share__label {
+      margin: 0 0.5rem 0 0;
+    }
+
+    .article-share__button {
+      display: inline-flex;
+      width: auto;
+      min-height: 2.6rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius-xs);
+      gap: 0.4rem;
+    }
+
+    .article-share__button span {
+      font-size: var(--text-2xs);
+    }
+  }
+
+  @media (max-width: 380px) {
+    .article-share {
+      gap: 0.4rem;
+    }
+
+    .article-share__label {
+      display: none;
+    }
+
+    .article-share__button {
+      padding-inline: 0.55rem;
+    }
+  }
+</style>

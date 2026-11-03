@@ -1,0 +1,297 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import PetalMark from '../../components/PetalMark.astro';
+import { getAllArticles, getCategoryCounts } from '../../lib/articles';
+import { topics } from '../../data/topics';
+
+const articles = await getAllArticles();
+const counts = getCategoryCounts(articles);
+---
+
+<BaseLayout
+  title="Topics"
+  description="Explore Blossie by subject: lifestyle, beauty, personal style, wellness, home, and culture — six ways into a slower, more attentive life."
+>
+  <header class="topics-hero">
+    <div class="container topics-hero__inner">
+      <div>
+        <p class="eyebrow">
+          <span class="eyebrow__rule" aria-hidden="true"></span>
+          Subjects
+        </p>
+        <h1 class="page-hero__title topics-hero__title">
+          Six subjects,<br /><em>endless detours.</em>
+        </h1>
+      </div>
+      <div class="topics-hero__aside">
+        <p>
+          A subject is not a box. It is a way in: a place to start reading, and a
+          thread to follow into the rest of the journal.
+        </p>
+        <a class="text-link" href="/journal/">
+          Browse everything
+          <Icon name="arrow-right" size={14} />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="topics-section" aria-labelledby="topics-list-heading">
+    <div class="container">
+      <h2 id="topics-list-heading" class="sr-only">All topics</h2>
+      <div class="topics-grid">
+        {topics.map((topic, index) => (
+          <article class:list={['topic-tile', { 'topic-tile--offset': index % 2 === 1 }]}>
+            <a class="topic-tile__media image-reveal" href={`/topics/${topic.slug}/`} tabindex="-1" aria-hidden="true">
+              <Image
+                src={topic.image}
+                alt={topic.imageAlt}
+                widths={[400, 640, 800, 1000]}
+                sizes="(min-width: 900px) 45vw, 92vw"
+                format="webp"
+                quality={82}
+                loading={index < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+              <span class="topic-tile__number">{String(index + 1).padStart(2, '0')}</span>
+            </a>
+            <div class="topic-tile__body">
+              <div class="topic-tile__heading">
+                <h2>
+                  <a class="title-link" href={`/topics/${topic.slug}/`}>{topic.name}</a>
+                </h2>
+                <span class="topic-tile__count">
+                  {counts.get(topic.category) ?? 0} {counts.get(topic.category) === 1 ? 'story' : 'stories'}
+                </span>
+              </div>
+              <p>{topic.shortDescription}</p>
+              <a class="topic-tile__link" href={`/topics/${topic.slug}/`} aria-label={`Explore ${topic.name}`}>
+                <Icon name="arrow-up-right" size={18} />
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="topics-note">
+    <div class="container topics-note__inner">
+      <PetalMark size={34} />
+      <p class="topics-note__text">
+        “A subject is not a box. It is a way of noticing.”
+      </p>
+      <p class="topics-note__credit">The Blossie Editors</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .topics-hero {
+    padding-top: clamp(3rem, 6vw, 5.5rem);
+    padding-bottom: clamp(3.25rem, 6vw, 5rem);
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topics-hero__inner {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    align-items: end;
+    gap: clamp(2.5rem, 7vw, 7rem);
+  }
+
+  .topics-hero__title {
+    margin-top: 1rem;
+    font-size: clamp(3.7rem, 2.3rem + 5.2vw, 7.5rem);
+    line-height: 0.93;
+  }
+
+  .topics-hero__title em {
+    font-style: italic;
+    color: var(--berry);
+  }
+
+  .topics-hero__aside {
+    max-width: 22rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .topics-hero__aside p {
+    font-size: var(--text-md);
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .topics-hero__aside .text-link {
+    margin-top: 1.4rem;
+  }
+
+  .topics-section {
+    padding-block: var(--section-y);
+  }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(3rem, 7vw, 6rem) clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .topic-tile--offset {
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .topic-tile__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--surface);
+    border-radius: var(--arch);
+  }
+
+  .topic-tile__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-tone);
+  }
+
+  .topic-tile__number {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    padding: 0.28rem 0.6rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    color: var(--contrast-ink);
+    background: rgba(44, 31, 36, 0.68);
+    border-radius: var(--radius-xs);
+    transform: translateX(-50%);
+  }
+
+  .topic-tile__body {
+    position: relative;
+    padding-top: 1.25rem;
+  }
+
+  .topic-tile__heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .topic-tile__heading h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.15rem, 1.8rem + 1.2vw, 3rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .topic-tile__count {
+    flex: none;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.05em;
+    color: var(--faint);
+  }
+
+  .topic-tile__body > p {
+    max-width: 28rem;
+    margin-top: 0.7rem;
+    padding-right: 2.5rem;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .topic-tile__link {
+    position: absolute;
+    right: 0;
+    bottom: 0.1rem;
+    display: grid;
+    place-items: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    transition:
+      color var(--duration-base) ease,
+      background-color var(--duration-base) ease,
+      border-color var(--duration-base) ease;
+  }
+
+  .topic-tile__link:hover {
+    color: var(--button-ink);
+    background: var(--button-bg);
+    border-color: var(--button-bg);
+  }
+
+  .topics-note {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: var(--contrast-bg);
+    color: var(--contrast-ink);
+  }
+
+  .topics-note__inner {
+    display: grid;
+    justify-items: center;
+    max-width: 46rem;
+    text-align: center;
+    color: var(--rose);
+  }
+
+  .topics-note__text {
+    margin-top: 1.3rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 1.5rem + 1.8vw, 3.2rem);
+    font-style: italic;
+    line-height: 1.25;
+    color: var(--contrast-ink);
+  }
+
+  .topics-note__credit {
+    margin-top: 1rem;
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--contrast-muted);
+  }
+
+  @media (max-width: 880px) {
+    .topics-hero__inner {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .topics-hero__aside {
+      max-width: 32rem;
+    }
+
+    .topics-grid {
+      gap: 2.75rem 2rem;
+    }
+
+    .topic-tile--offset {
+      margin-top: 2rem;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .topics-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .topic-tile--offset {
+      margin-top: 0;
+    }
+
+    .topic-tile__body > p {
+      padding-right: 3rem;
+    }
+  }
+</style>

@@ -1,0 +1,82 @@
+---
+interface Props {
+  tone?: 'default' | 'light';
+  size?: 'nav' | 'footer' | 'large';
+  class?: string;
+}
+
+const { tone = 'default', size = 'nav', class: className } = Astro.props;
+---
+
+<a
+  href="/"
+  class:list={['wordmark', `wordmark--${size}`, `wordmark--${tone}`, className]}
+  aria-label="Blossie — home"
+>
+  <span class="wordmark__letters" aria-hidden="true">
+    <span>Bloss</span><span class="wordmark__i">ı<span class="wordmark__dot"></span></span><span>e</span>
+  </span>
+</a>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.012em;
+    white-space: nowrap;
+  }
+
+  .wordmark--light {
+    color: var(--contrast-ink);
+  }
+
+  .wordmark--nav {
+    font-size: 2rem;
+  }
+
+  .wordmark--footer {
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+  }
+
+  .wordmark--large {
+    font-size: clamp(4.5rem, 13vw, 10rem);
+    line-height: 0.8;
+  }
+
+  .wordmark__letters {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .wordmark__i {
+    position: relative;
+    display: inline-block;
+    padding: 0;
+  }
+
+  .wordmark__dot {
+    position: absolute;
+    top: 0.105em;
+    left: 50%;
+    width: 0.105em;
+    height: 0.145em;
+    border-radius: 60% 40% 55% 45% / 55% 55% 45% 45%;
+    background: var(--rose);
+    transform: translateX(-50%) rotate(25deg);
+    transition: background-color var(--duration-base) ease;
+  }
+
+  .wordmark:hover .wordmark__dot {
+    background: var(--accent);
+  }
+
+  @media (max-width: 480px) {
+    .wordmark--nav {
+      font-size: 1.8rem;
+    }
+  }
+</style>

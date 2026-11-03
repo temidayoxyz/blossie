@@ -1,0 +1,69 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  linkHref?: string;
+  linkLabel?: string;
+  tone?: 'default' | 'light';
+  id?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  description,
+  linkHref,
+  linkLabel = 'View all',
+  tone = 'default',
+  id,
+} = Astro.props;
+---
+
+<div class:list={['section-heading', { 'section-heading--light': tone === 'light' }]}>
+  <div class="section-heading__text">
+    <p class:list={['eyebrow', { 'eyebrow--muted': tone === 'light' }]}>
+      <span class="eyebrow__rule" aria-hidden="true"></span>
+      {eyebrow}
+    </p>
+    <h2 id={id}>{title}</h2>
+    {description && <p>{description}</p>}
+  </div>
+  {linkHref && (
+    <a
+      class:list={['text-link section-heading__link', { 'text-link--light': tone === 'light' }]}
+      href={linkHref}
+    >
+      {linkLabel}
+      <Icon name="arrow-right" size={14} />
+    </a>
+  )}
+</div>
+
+<style>
+  .section-heading--light {
+    border-color: var(--contrast-line);
+  }
+
+  .section-heading--light h2 {
+    color: var(--contrast-ink);
+  }
+
+  .section-heading--light p:not(.eyebrow) {
+    color: var(--contrast-muted);
+  }
+
+  @media (max-width: 620px) {
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .section-heading__link {
+      margin-bottom: 0;
+    }
+  }
+</style>

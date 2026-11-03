@@ -1,0 +1,549 @@
+---
+import { Image, getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import ArticleMeta from '../../components/ArticleMeta.astro';
+import ShareLinks from '../../components/ShareLinks.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import PetalMark from '../../components/PetalMark.astro';
+import Icon from '../../components/Icon.astro';
+import {
+  getAllArticles,
+  getArticleUrl,
+  getReadingTime,
+  getRelatedArticles,
+  getTopicFor,
+} from '../../lib/articles';
+import { render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const articles = await getAllArticles();
+  return articles.map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const topic = getTopicFor(article);
+const readingTime = getReadingTime(article);
+const articles = await getAllArticles();
+const related = getRelatedArticles(article, articles, 3);
+const wordCount = article.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+
+const site = Astro.site ?? new URL('https://blossie-blog.vercel.app');
+const base = site.toString().replace(/\/$/, '');
+const canonical = new URL(getArticleUrl(article), site).toString();
+const ogImage = await getImage({
+  src: article.data.cover,
+  width: 1200,
+  height: 630,
+  fit: 'cover',
+  position: 'centre',
+  format: 'jpg',
+  quality: 82,
+});
+const ogImageUrl = new URL(ogImage.src, site).toString();
+const topicUrl = topic ? new URL(`/topics/${topic.slug}/`, site).toString() : undefined;
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Journal', href: '/journal/' },
+  ...(topic ? [{ label: topic.name, href: `/topics/${topic.slug}/` }] : []),
+  { label: article.data.title },
+];
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: 'Home', url: base },
+    { name: 'Journal', url: `${base}/journal/` },
+    ...(topic && topicUrl ? [{ name: topic.name, url: topicUrl }] : []),
+    { name: article.data.title, url: canonical },
+  ].map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url,
+  })),
+};
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: article.data.title,
+  description: article.data.standfirst,
+  image: [ogImageUrl],
+  datePublished: article.data.pubDate.toISOString(),
+  dateModified: article.data.pubDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: article.data.author,
+    url: base,
+  },
+  publisher: { '@id': `${base}/#organization` },
+  articleSection: article.data.category,
+  keywords: article.data.tags.join(', '),
+  wordCount,
+  inLanguage: 'en',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  url: canonical,
+};
+---
+
+<BaseLayout
+  title={article.data.title}
+  ogTitle={article.data.title}
+  description={article.data.standfirst}
+  image={ogImageUrl}
+  imageAlt={article.data.coverAlt}
+  type="article"
+  publishedTime={article.data.pubDate}
+  modifiedTime={article.data.pubDate}
+  jsonLd={[breadcrumbSchema, articleSchema]}
+>
+  <article class="article" data-article-page>
+    <div class="reading-progress" data-reading-progress aria-hidden="true">
+      <span class="reading-progress__bar" data-reading-progress-bar></span>
+    </div>
+
+    <header class="article-header">
+      <div class="article-header__inner">
+        <Breadcrumb items={breadcrumbItems} class="article-breadcrumb" />
+
+        <div class="article-header__kicker">
+          {topic ? (
+            <a class="category" href={`/topics/${topic.slug}/`}>{article.data.category}</a>
+          ) : (
+            <span class="category">{article.data.category}</span>
+          )}
+          {article.data.featured && <span class="article-header__flag">Cover story</span>}
+        </div>
+
+        <h1 class="article-title">{article.data.title}</h1>
+        <p class="article-standfirst">{article.data.standfirst}</p>
+        <ArticleMeta
+          date={article.data.pubDate}
+          readingTime={readingTime}
+          author={article.data.author}
+          class="article-byline"
+        />
+      </div>
+
+      <figure class="article-hero">
+        <div class="container article-hero__frame">
+          <Image
+            src={article.data.cover}
+            alt={article.data.coverAlt}
+            widths={[720, 960, 1280, 1600, 2000]}
+            sizes="(min-width: 1300px) 1216px, (min-width: 780px) 90vw, 100vw"
+            format="webp"
+            quality={84}
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </div>
+        <figcaption class="container article-hero__caption">
+          <span>{article.data.coverCaption ?? article.data.coverAlt}</span>
+          <span class="article-hero__credit">{article.data.coverCredit}</span>
+        </figcaption>
+      </figure>
+    </header>
+
+    <div class="article-layout" data-reading-body>
+      <ShareLinks
+        url={canonical}
+        title={article.data.title}
+        class="article-layout__share"
+      />
+
+      <div class="article-content">
+        <div class="prose prose--dropcap article-prose">
+          <Content />
+        </div>
+
+        <div class="article-end" aria-hidden="true">
+          <span class="petal-divider"><PetalMark size={26} /></span>
+        </div>
+
+        <footer class="article-footer">
+          <div class="article-tags">
+            <span class="article-tags__label">Filed under</span>
+            <div class="article-tags__list">
+              {topic && (
+                <a class="tag-link" href={`/topics/${topic.slug}/`}>{topic.name}</a>
+              )}
+              {article.data.tags.map((tag) => (
+                <a class="tag-link" href={`/search/?q=${encodeURIComponent(tag)}`}>
+                  {tag}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="article-credit">
+            <PetalMark size={28} />
+            <div>
+              <p class="eyebrow">From the editors</p>
+              <p>
+                Blossie is written in the collective voice of its editors — an
+                independent journal about attention, beauty, and the ordinary
+                life. No sponsored posts, no invented expertise, no rush.
+              </p>
+              <p class="article-credit__byline">
+                Words by {article.data.author}. Photography via Pexels and Unsplash.
+              </p>
+            </div>
+          </div>
+
+          <a class="article-back" href="/journal/">
+            <Icon name="arrow-right" size={14} />
+            <span>Back to the journal</span>
+          </a>
+        </footer>
+      </div>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="related" aria-labelledby="related-heading">
+      <div class="container">
+        <SectionHeading
+          eyebrow="Continue reading"
+          title="More from the journal"
+          linkHref={topic ? `/topics/${topic.slug}/` : '/journal/'}
+          linkLabel={topic ? `All ${topic.name.toLowerCase()} stories` : 'All stories'}
+          id="related-heading"
+        />
+        <div class="related__grid">
+          {related.map((entry) => (
+            <ArticleCard article={entry} variant="standard" showExcerpt />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .article {
+    background: var(--bg);
+  }
+
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 70;
+    height: 2px;
+    opacity: 0;
+    background: transparent;
+    pointer-events: none;
+    transition: opacity var(--duration-base) ease;
+  }
+
+  .reading-progress.is-visible,
+  .reading-progress.is-complete {
+    opacity: 1;
+  }
+
+  .reading-progress__bar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+
+  .article-header {
+    padding-top: clamp(2rem, 4vw, 3.5rem);
+    padding-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .article-header__inner {
+    width: min(100% - (var(--gutter) * 2), 56rem);
+    margin-inline: auto;
+  }
+
+  .article-breadcrumb {
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .article-header__kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .article-header__flag {
+    padding-left: 0.8rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .article-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 2.1rem + 3.6vw, 5.6rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+    animation: article-in 700ms var(--ease-out) both;
+  }
+
+  .article-standfirst {
+    max-width: 48rem;
+    margin-top: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-size: clamp(1.1rem, 1rem + 0.35vw, 1.3rem);
+    line-height: 1.7;
+    color: var(--ink-soft);
+    animation: article-in 700ms var(--ease-out) 100ms both;
+  }
+
+  .article-byline {
+    margin-top: clamp(1.4rem, 3vw, 2rem);
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .article-hero {
+    margin-top: clamp(1.8rem, 4vw, 2.25rem);
+  }
+
+  .article-hero__frame {
+    width: min(100% - (var(--gutter) * 2), var(--container-wide));
+    overflow: hidden;
+    aspect-ratio: 3 / 2;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+  }
+
+  .article-hero__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 42%;
+    filter: var(--image-tone);
+  }
+
+  .article-hero__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    width: min(100% - (var(--gutter) * 2), 56rem);
+    margin-top: 0.75rem;
+    font-size: var(--text-2xs);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .article-hero__caption > span:first-child {
+    max-width: 40rem;
+  }
+
+  .article-hero__credit {
+    color: var(--faint);
+  }
+
+  .article-layout {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 43rem);
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+    justify-content: center;
+    width: min(100% - (var(--gutter) * 2), 52rem);
+    margin-inline: auto;
+    padding-block: clamp(2.75rem, 6vw, 5rem);
+  }
+
+  .article-content {
+    min-width: 0;
+  }
+
+  .article-prose {
+    max-width: 43rem;
+  }
+
+  .article-end {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    color: var(--rose);
+  }
+
+  .article-end .petal-divider::before,
+  .article-end .petal-divider::after {
+    max-width: 5rem;
+  }
+
+  .article-footer {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .article-tags {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .article-tags__label {
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .article-tags__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-link {
+    padding: 0.4rem 0.65rem;
+    font-size: var(--text-xs);
+    color: var(--ink-soft);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .tag-link:hover {
+    color: var(--accent);
+    background: var(--surface);
+    border-color: var(--rose-soft);
+  }
+
+  .article-credit {
+    display: flex;
+    gap: 1.1rem;
+    padding: 1.25rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--rose);
+  }
+
+  .article-credit .eyebrow {
+    margin-bottom: 0.45rem;
+  }
+
+  .article-credit p:not(.eyebrow) {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .article-credit .article-credit__byline {
+    margin-top: 0.7rem;
+    font-size: var(--text-2xs);
+    color: var(--faint);
+  }
+
+  .article-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color var(--duration-fast) ease;
+  }
+
+  .article-back svg {
+    transform: rotate(180deg);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .article-back:hover {
+    color: var(--accent);
+  }
+
+  .article-back:hover svg {
+    transform: rotate(180deg) translateX(3px);
+  }
+
+  .related {
+    padding-block: var(--section-y-sm);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+  }
+
+  .related__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.25rem);
+    margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+  }
+
+  @keyframes article-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 800px) {
+    .article-layout {
+      grid-template-columns: minmax(0, 43rem);
+      width: min(100% - (var(--gutter) * 2), 46rem);
+      gap: 1.25rem;
+    }
+
+    .article-layout__share {
+      order: -1;
+    }
+
+    .related__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .article-hero__frame {
+      aspect-ratio: 4 / 3;
+    }
+
+    .article-hero__caption {
+      flex-direction: column;
+    }
+
+    .related__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .article-credit {
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .article-title,
+    .article-standfirst {
+      animation: none;
+    }
+  }
+</style>

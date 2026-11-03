@@ -1,0 +1,240 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  variant?: 'popover' | 'inline';
+  id?: string;
+}
+
+const { variant = 'popover', id = 'appearance-menu' } = Astro.props;
+const options = [
+  { value: 'light', label: 'Light', icon: 'sun' as const },
+  { value: 'dark', label: 'Dark', icon: 'moon' as const },
+  { value: 'system', label: 'System', icon: 'system' as const },
+];
+---
+
+{variant === 'popover' ? (
+  <div class="theme-select" data-theme-select>
+    <button
+      type="button"
+      class="theme-trigger icon-btn"
+      aria-label="Appearance: System"
+      aria-expanded="false"
+      aria-controls={id}
+      data-theme-trigger
+      data-theme-label-holder
+    >
+      <span class="theme-trigger__icon">
+        <span data-theme-icon="light"><Icon name="sun" size={18} /></span>
+        <span data-theme-icon="dark"><Icon name="moon" size={18} /></span>
+        <span data-theme-icon="system"><Icon name="system" size={18} /></span>
+      </span>
+      <Icon name="chevron-down" size={12} class="theme-trigger__chevron" />
+    </button>
+    <div class="theme-menu" id={id} data-theme-menu hidden>
+      <p class="theme-menu__label">Appearance</p>
+      <div class="theme-options">
+        {options.map((option) => (
+          <button
+            type="button"
+            class="theme-option"
+            data-theme-option={option.value}
+            aria-pressed={option.value === 'system' ? 'true' : 'false'}
+          >
+            <Icon name={option.icon} size={16} />
+            <span>{option.label}</span>
+            <Icon name="check" size={13} class="theme-option__check" />
+          </button>
+        ))}
+      </div>
+      <p class="theme-menu__note">Your choice is saved on this device.</p>
+    </div>
+  </div>
+) : (
+  <div class="theme-select theme-select--inline" data-theme-select>
+    <span class="theme-inline__label" id={`${id}-label`}>Appearance</span>
+    <div class="theme-segmented" role="group" aria-labelledby={`${id}-label`}>
+      {options.map((option) => (
+        <button
+          type="button"
+          class="theme-segment"
+          data-theme-option={option.value}
+          aria-pressed={option.value === 'system' ? 'true' : 'false'}
+        >
+          <Icon name={option.icon} size={15} />
+          <span>{option.label}</span>
+        </button>
+      ))}
+    </div>
+    <p class="theme-inline__note">Saved on this device.</p>
+  </div>
+)}
+
+<style>
+  .theme-select {
+    position: relative;
+  }
+
+  .theme-trigger {
+    gap: 0.3rem;
+    padding-inline: 0.55rem;
+  }
+
+  .theme-trigger__icon {
+    display: grid;
+    place-items: center;
+  }
+
+  .theme-trigger__icon [data-theme-icon] {
+    display: none;
+  }
+
+  :global(html[data-theme-choice='light']) .theme-trigger [data-theme-icon='light'],
+  :global(html[data-theme-choice='dark']) .theme-trigger [data-theme-icon='dark'],
+  :global(html[data-theme-choice='system']) .theme-trigger [data-theme-icon='system'] {
+    display: grid;
+    place-items: center;
+  }
+
+  .theme-trigger__chevron {
+    color: var(--faint);
+  }
+
+  .theme-menu {
+    position: absolute;
+    top: calc(100% + 0.65rem);
+    right: 0;
+    z-index: 80;
+    width: 13.75rem;
+    padding: 0.8rem;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 18px 45px -30px rgba(50, 30, 35, 0.5);
+    animation: menu-in 180ms var(--ease-out);
+  }
+
+  .theme-menu__label {
+    padding: 0.3rem 0.55rem 0.55rem;
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .theme-options {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .theme-option {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr 1rem;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.55rem;
+    font-size: var(--text-sm);
+    text-align: left;
+    color: var(--ink-soft);
+    border-radius: var(--radius-xs);
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
+  }
+
+  .theme-option:hover {
+    color: var(--ink);
+    background: var(--bg-soft);
+  }
+
+  .theme-option[aria-pressed='true'] {
+    color: var(--ink);
+    background: var(--bg-soft);
+  }
+
+  .theme-option__check {
+    opacity: 0;
+    color: var(--accent);
+  }
+
+  .theme-option[aria-pressed='true'] .theme-option__check {
+    opacity: 1;
+  }
+
+  .theme-menu__note {
+    margin-top: 0.6rem;
+    padding-top: 0.65rem;
+    padding-inline: 0.55rem;
+    font-size: var(--text-2xs);
+    line-height: 1.5;
+    color: var(--faint);
+    border-top: 1px solid var(--line);
+  }
+
+  .theme-select--inline {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .theme-inline__label {
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .theme-segmented {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.2rem;
+    padding: 0.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+  }
+
+  .theme-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.65rem;
+    padding: 0.4rem 0.5rem;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    border-radius: 1px;
+    transition:
+      color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
+  }
+
+  .theme-segment:hover {
+    color: var(--ink);
+  }
+
+  .theme-segment[aria-pressed='true'] {
+    color: var(--ink);
+    background: var(--surface);
+  }
+
+  .theme-inline__note {
+    font-size: var(--text-2xs);
+    color: var(--faint);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
